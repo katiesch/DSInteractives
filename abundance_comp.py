@@ -10,7 +10,7 @@ in your browser.
 import numpy as np
 
 from bokeh.plotting import Figure
-from bokeh.models import ColumnDataSource, HBox, VBoxForm,Range1d, HoverTool
+from bokeh.models import ColumnDataSource, HBox, VBoxForm,Range1d, HoverTool, BoxZoomTool, ResetTool
 from bokeh.models.widgets import TextInput,Select
 from bokeh.io import curdoc
 
@@ -27,7 +27,8 @@ hover = HoverTool(tooltips=[("sobject_id","@sobject_id")])
 # Set up plot
 #plot = Figure(plot_height=400, plot_width=400, title="My Abundance Plot",
 #              tools="crosshair,pan,reset,resize,save,box_zoom")
-plot = Figure(plot_height=400, plot_width=400, title="My Abundance Plot",tools=[hover])
+TOOLS= [BoxZoomTool(), ResetTool(), HoverTool(tooltips=[("sobject_id","@sobject_id")])]
+plot = Figure(plot_height=400, plot_width=400, title="My Abundance Plot",tools=TOOLS)
 plot.xaxis.axis_label = "[Fe/H]"
 plot.yaxis.axis_label = "[a/Fe]"
 
