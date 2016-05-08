@@ -1,6 +1,6 @@
-''' Present an interactive function explorer with slider widgets.
-Scrub the sliders to change the properties of the ``sin`` curve, or
-type into the title text box to update the title of the plot.
+'''
+Interactive plotting window to look at various SME abundances
+for GALAH K2 data. 
 Use the ``bokeh serve`` command to run the example by executing:
     bokeh serve abundance_comp.py
 at your command prompt. Then navigate to the URL
