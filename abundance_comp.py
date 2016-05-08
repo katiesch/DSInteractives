@@ -19,18 +19,14 @@ from astropy.table import Table
 abund=Table.read('/Users/kschles/Documents/GALAH/wg4output/wg4_04292016/sobject_iraf_k2.fits', format='fits')
 abund=Table.to_pandas(abund)
 
-
-N = 200
-x = np.linspace(0, 4*np.pi, N)
-y = np.sin(x)
-source = ColumnDataSource(data=dict(x=x, y=y))
+source = ColumnDataSource(data=dict(x=abund.loc[0:100,'feh_cannon'], y=abund.loc[0:100,'alpha_fe_cannon']))
 
 # Set up plot
-plot = Figure(plot_height=400, plot_width=400, title="my sine wave",
+plot = Figure(plot_height=400, plot_width=400, title="My Abundance Plot",
               tools="crosshair,pan,reset,resize,save,wheel_zoom",
-              x_range=[0, 4*np.pi], y_range=[-2.5, 2.5])
+              x_range=[-2,1.0], y_range=[-0.2,1.0])
 
-plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
+plot.scatter('x', 'y', source=source, color='black')
 
 axis_map = {
     "[Fe/H]": "feh_sme",
@@ -41,10 +37,6 @@ axis_map = {
 
 # Set up widgets
 text = TextInput(title="title", value='my sine wave')
-offset = Slider(title="offset", value=0.0, start=-5.0, end=5.0, step=0.1)
-amplitude = Slider(title="amplitude", value=1.0, start=-5.0, end=5.0)
-phase = Slider(title="phase", value=0.0, start=0.0, end=2*np.pi)
-freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1)
 select_x=Select(title="X axis:", value="[Fe/H]", options=axis_map.keys())
 select_y=Select(title="Y axis:", value="[a/Fe]", options=axis_map.keys())
 
@@ -56,24 +48,18 @@ text.on_change('value', update_title)
 
 def update_data(attrname, old, new):
 
-    # Get the current slider values
-    a = amplitude.value
-    b = offset.value
-    w = phase.value
-    k = freq.value
+    df = abund
+    x_name = axis_map[select_x.value]
+    y_name = axis_map[select_y.value]
 
-    # Generate the new curve
-    x = np.linspace(0, 4*np.pi, N)
-    y = a*np.sin(k*x + w) + b
+    source.data = dict(x=df[x_name], y=df[y_name])
 
-    source.data = dict(x=x, y=y)
-
-for w in [offset, amplitude, phase, freq]:
+for w in [select_x,select_y]:
     w.on_change('value', update_data)
 
 
 # Set up layouts and add to document
-inputs = VBoxForm(children=[text, offset, amplitude, phase, freq,select_x,select_y])
+inputs = VBoxForm(children=[text,select_x,select_y])
 
 curdoc().add_root(HBox(children=[inputs, plot], width=800))
 
