@@ -23,8 +23,10 @@ source = ColumnDataSource(data=dict(x=abund.loc[0:100,'feh_cannon'], y=abund.loc
 
 # Set up plot
 plot = Figure(plot_height=400, plot_width=400, title="My Abundance Plot",
-              tools="crosshair,pan,reset,resize,save,wheel_zoom",
+              tools="crosshair,pan,reset,resize,save,box_zoom",
               x_range=[-2,1.0], y_range=[-0.2,1.0])
+plot.xaxis.axis_label = "[Fe/H]"
+plot.yaxis.axis_label = "[a/Fe]"
 
 plot.scatter('x', 'y', source=source, color='black')
 
@@ -36,7 +38,7 @@ axis_map = {
 }
 
 # Set up widgets
-text = TextInput(title="title", value='my sine wave')
+text = TextInput(title="title", value='my abundance plot')
 select_x=Select(title="X axis:", value="[Fe/H]", options=axis_map.keys())
 select_y=Select(title="Y axis:", value="[a/Fe]", options=axis_map.keys())
 
@@ -51,8 +53,10 @@ def update_data(attrname, old, new):
     df = abund
     x_name = axis_map[select_x.value]
     y_name = axis_map[select_y.value]
+    plot.xaxis.axis_label = select_x.value
+    plot.yaxis.axis_label = select_y.value
 
-    source.data = dict(x=df[x_name], y=df[y_name])
+    source.data = dict(x=df.loc[0:100,x_name], y=df.loc[0:100,y_name])
 
 for w in [select_x,select_y]:
     w.on_change('value', update_data)
