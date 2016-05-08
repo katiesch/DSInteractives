@@ -40,7 +40,7 @@ offset = Slider(title="offset", value=0.0, start=-5.0, end=5.0, step=0.1)
 amplitude = Slider(title="amplitude", value=1.0, start=-5.0, end=5.0)
 phase = Slider(title="phase", value=0.0, start=0.0, end=2*np.pi)
 freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1)
-select_x=Select(title="X axis:", value="[Fe/H]", options=["[Fe/H]", "bar", "baz", "quux"])
+select_x=Select(title="X axis:", value="[Fe/H]", options=axis_map.keys())
 
 # Set up callbacks
 def update_title(attrname, old, new):
