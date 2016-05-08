@@ -21,6 +21,7 @@ abund=Table.read('/Users/kschles/Documents/GALAH/wg4output/wg4_04292016/sobject_
 abund=Table.to_pandas(abund)
 
 source = ColumnDataSource(data=dict(x=abund.loc[0:100,'feh_cannon'], y=abund.loc[0:100,'alpha_fe_cannon'], sobject_id=abund.loc[0:100,'sobject_id']))
+data=dict(x=abund.loc[0:100,'feh_cannon'], y=abund.loc[0:100,'alpha_fe_cannon'], sobject_id=abund.loc[0:100,'sobject_id'])
 
 # Set up plot
 #plot = Figure(plot_height=400, plot_width=400, title="My Abundance Plot",
@@ -34,13 +35,20 @@ plot.scatter('x', 'y', source=source, color='black')
 
 # create the horizontal histogram
 x1 = np.random.normal(loc=5.0, size=400) * 100
-hhist, hedges = np.histogram(x1, bins=20)
+hhist, hedges = np.histogram(np.array(data['x']).astype(float), bins=20)
 hzeros = np.zeros(len(hedges)-1)
 hmax = max(hhist)*1.1
+
+LINE_ARGS = dict(color="#3A5785", line_color=None)
 
 ph = Figure(toolbar_location=None, plot_width=plot.plot_width, plot_height=200, x_range=plot.x_range,
             y_range=(-hmax, hmax), title=None, min_border=10, min_border_left=50)
 ph.xgrid.grid_line_color = None
+
+ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hhist, color="white", line_color="#3A5785")
+hh1 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **LINE_ARGS)
+hh2 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **LINE_ARGS)
+
 
 axis_map = {
     "[Fe/H]": "feh_cannon",
