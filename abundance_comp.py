@@ -15,6 +15,11 @@ from bokeh.models.widgets import Slider, TextInput,Select
 from bokeh.io import curdoc
 
 # Set up data
+from astropy.table import Table
+abund=Table.read('/Users/kschles/Documents/GALAH/wg4output/wg4_04292016/sobject_iraf_k2.fits', format='fits')
+abund=Table.to_pandas(abund)
+
+
 N = 200
 x = np.linspace(0, 4*np.pi, N)
 y = np.sin(x)
