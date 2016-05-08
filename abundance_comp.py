@@ -41,6 +41,7 @@ amplitude = Slider(title="amplitude", value=1.0, start=-5.0, end=5.0)
 phase = Slider(title="phase", value=0.0, start=0.0, end=2*np.pi)
 freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1)
 select_x=Select(title="X axis:", value="[Fe/H]", options=axis_map.keys())
+select_y=Select(title="Y axis:", value="[a/Fe]", options=axis_map.keys())
 
 # Set up callbacks
 def update_title(attrname, old, new):
@@ -67,7 +68,7 @@ for w in [offset, amplitude, phase, freq]:
 
 
 # Set up layouts and add to document
-inputs = VBoxForm(children=[text, offset, amplitude, phase, freq,select_x])
+inputs = VBoxForm(children=[text, offset, amplitude, phase, freq,select_x,select_y])
 
 curdoc().add_root(HBox(children=[inputs, plot], width=800))
 
