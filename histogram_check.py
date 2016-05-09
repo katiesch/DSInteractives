@@ -13,6 +13,7 @@ from bokeh.plotting import figure, hplot, vplot
 from bokeh.models import ColumnDataSource, HBox, VBoxForm,Range1d, HoverTool, BoxZoomTool, ResetTool, ResizeTool, PreviewSaveTool, PanTool, BoxSelectTool, LassoSelectTool, Paragraph
 from bokeh.models.widgets import TextInput,Select
 from bokeh.io import curdoc
+from bokeh.charts import Histogram
 
 def update_data(source, xname, yname):
 
@@ -31,9 +32,28 @@ def update_data(source, xname, yname):
     #ph.yaxis.axis_label = yname
 
     source = ColumnDataSource(data=dict(x=df.loc[0:100,x_name], y=df.loc[0:100,y_name], sobject_id=df.loc[0:100,'sobject_id']))
+
     return source
 
-def make_scatter_plot(source): 
+def update_hist_data(source, xname, yname):
+    axis_map = {
+        "[Fe/H]": "feh_cannon",
+        "[a/Fe]": "alpha_fe_cannon",
+        "Ca": "ca_abund_sme",
+        "Mg": "mg_abund_sme",
+    }
+
+
+    df = source
+    x_name = axis_map[xname]
+    y_name = axis_map[yname]
+     
+    hhist, hedges = np.histogram(~np.isnan(df.loc[0:100,x_name]), bins=20)
+
+    source_hor=ColumnDataSource(data=dict(x=hhist, y=hedges[0:20]))
+    return source_hor
+
+def make_scatter_plot(source, source_hor): 
 
     TOOLS="pan,wheel_zoom,box_select,lasso_select"
 
@@ -50,13 +70,16 @@ def make_scatter_plot(source):
 
     # create the horizontal histogram
     hhist, hedges = np.histogram(source.data['x'], bins=20)
+    #hh1.data_source.data["top"]=hhist
+    #hhist=source_hor.data['x']
+    #hedges=source_hor.data['y']
     hzeros = np.zeros(len(hedges)-1)
     hmax = max(hhist)*1.1
 
     LINE_ARGS = dict(color="#3A5785", line_color=None)
 
     ph = figure(toolbar_location=None, plot_width=scatter_plot.plot_width, plot_height=200, x_range=scatter_plot.x_range,
-                y_range=(-hmax, hmax), title=None, min_border=10, min_border_left=50)
+                title=None, min_border=10, min_border_left=50)
     ph.xgrid.grid_line_color = None
 
     ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hhist, color="white", line_color="#3A5785")
@@ -65,9 +88,6 @@ def make_scatter_plot(source):
     ph.min_border_top = 10
     ph.min_border_right = 10
     
-    x=source.data['x']
-    y=source.data['y']
-
     # create the vertical histogram
     vhist, vedges = np.histogram(y, bins=20)
     vzeros = np.zeros(len(vedges)-1)
@@ -91,12 +111,21 @@ def make_scatter_plot(source):
     return scatter_plot,ph,pv
 
 # set up callbacks
-def update_plot(attrname, old, new):
+def update_scatter_plot(attr, old, new):
     x_value=select_x.value
     y_value=select_y.value
 
     src = update_data(abund, x_value, y_value)
+    hhist1, hedges1 = np.histogram(~np.isnan(src.data['x']), bins=20)
+    hh1.data_source.data["top"]   =  hhist1
     source.data.update(src.data)
+
+def update_histogram(attrname, old, new):
+    x_value=select_x.value
+    y_value=select_y.value
+
+    srch = update_hist_data(abund, x_value, y_value)    
+    source_hor.data.update(srch.data) 
 
 
 
@@ -120,18 +149,19 @@ y_value="[a/Fe]"
 
 ## Set up initial data: 
 source = update_data(abund, x_value, y_value)
+source_hor=update_hist_data(abund, x_value, y_value) 
 
 ## Produce main scatter plot: 
-plot, ph, pv=make_scatter_plot(source)
+plot, ph, pv=make_scatter_plot(source, source_hor)
 
 ## Produce horizontal histogram:
 #ph=make_hor_hist(source, plot)
 
 ## Produce vertical histogram
-#pv=make_vert_hist(source, plot) 
+#pv=make_vert_hist(source, plot)
 
 layout = vplot(hplot(plot, pv), hplot(ph, Paragraph(width=200)), hplot(select_x, select_y), width=800, height=800)
 
 
 for w in [select_x, select_y]:
-    w.on_change('value', update_plot)
+    w.on_change('value', update_scatter_plot, update_histogram)
