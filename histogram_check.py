@@ -29,8 +29,6 @@ def update_data(source, xname, yname):
     df = source
     x_name = axis_map[xname]
     y_name = axis_map[yname]
-    #ph.xaxis.axis_label = xname
-    #ph.yaxis.axis_label = yname
 
     test=np.where(np.isnan(df[x_name])==False)[0]
     hhist, hedges = np.histogram(df.loc[test,x_name], bins=20)
@@ -53,7 +51,7 @@ def update_data(source, xname, yname):
     return source
 
 
-def make_scatter_plot(source): 
+def make_scatter_plot(source, xname,yname): 
 
     TOOLS= [BoxZoomTool(), ResetTool(), ResizeTool(), PreviewSaveTool(), PanTool(), HoverTool(tooltips=[("sobject_id","@sobject_id")])]
     # create the scatter plot
@@ -74,7 +72,7 @@ def make_scatter_plot(source):
     ph.quad(bottom=0, left='hedges_left', right='hedges_right', top='hhist', color="white", line_color="#3A5785", source=source)
     ph.min_border_top = 10
     ph.min_border_right = 10
-    
+
     # create the vertical histogram
     th = 42 # need to adjust for toolbar height, unfortunately
     pv = figure(toolbar_location=None, plot_width=200, plot_height=scatter_plot.plot_height+th-10,
@@ -95,6 +93,15 @@ def make_scatter_plot(source):
 def update_scatter_plot(attr, old, new):
     x_value=select_x.value
     y_value=select_y.value
+
+    #ph.xaxis.axis_label = x_value
+    ph.yaxis.axis_label = 'Number'
+    
+    pv.xaxis.axis_label = 'Number'
+    #pv.yaxis.axis_label = yname
+
+    plot.xaxis.axis_label=x_value
+    plot.yaxis.axis_label=y_value
 
     src = update_data(abund, x_value, y_value)
     source.data.update(src.data)
@@ -122,7 +129,12 @@ y_value="[a/Fe]"
 source = update_data(abund, x_value, y_value)
 
 ## Produce main scatter plot: 
-plot, ph, pv=make_scatter_plot(source)
+plot, ph, pv=make_scatter_plot(source, x_value, y_value)
+
+ph.yaxis.axis_label = 'Number'
+pv.xaxis.axis_label = 'Number'
+plot.xaxis.axis_label=x_value
+plot.yaxis.axis_label=y_value
 
 ## Produce horizontal histogram:
 #ph=make_hor_hist(source, plot)
