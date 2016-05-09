@@ -54,18 +54,21 @@ def update_data(source, xname, yname):
     x_name = axis_map[xname]
     y_name = axis_map[yname]
 
+    xbinnum=25
+    ybinnum=25
+
     test=np.where(np.isnan(df[x_name])==False)[0]
-    hhist, hedges = np.histogram(df.loc[test,x_name], bins=20)
-    lst=[np.nan]*(len(df)-20) 
-    lst2=[np.nan]*(len(df)-21) 
+    hhist, hedges = np.histogram(df.loc[test,x_name], bins=xbinnum)
+    lst=[np.nan]*(len(df)-xbinnum) 
+    lst2=[np.nan]*(len(df)-(xbinnum+1)) 
     df['hhist']=pd.concat([pd.Series(hhist),pd.Series(lst)], ignore_index=True)
     df['hedges_left']=pd.concat([pd.Series(hedges[:-1]),pd.Series(lst2)], ignore_index=True)
     df['hedges_right']=pd.concat([pd.Series(hedges[1:]),pd.Series(lst2)], ignore_index=True)
     
     test=np.where(np.isnan(df[y_name])==False)[0]
-    vhist, vedges = np.histogram(df.loc[test,y_name], bins=20)
-    lst=[np.nan]*(len(df)-20) 
-    lst2=[np.nan]*(len(df)-21) 
+    vhist, vedges = np.histogram(df.loc[test,y_name], bins=ybinnum)
+    lst=[np.nan]*(len(df)-ybinnum) 
+    lst2=[np.nan]*(len(df)-(ybinnum+1)) 
     df['vhist']=pd.concat([pd.Series(vhist),pd.Series(lst)], ignore_index=True)
     df['vedges_left']=pd.concat([pd.Series(vedges[:-1]),pd.Series(lst2)], ignore_index=True)
     df['vedges_right']=pd.concat([pd.Series(vedges[1:]),pd.Series(lst2)], ignore_index=True)
@@ -77,7 +80,7 @@ def update_data(source, xname, yname):
 
 def make_scatter_plot(source, xname,yname): 
 
-    TOOLS= [BoxZoomTool(), ResetTool(), ResizeTool(), PreviewSaveTool(), PanTool(), HoverTool(tooltips=[("sobject_id","@sobject_id")])]
+    TOOLS= [BoxZoomTool(), ResetTool(), ResizeTool(), PanTool(), HoverTool(tooltips=[("sobject_id","@sobject_id")])]
     # create the scatter plot
     scatter_plot = figure(tools=TOOLS, plot_width=600, plot_height=600, title=None, min_border=10, min_border_left=50)
     r = scatter_plot.scatter('x','y', size=3, source=source, color="#3A5785", alpha=0.6)
