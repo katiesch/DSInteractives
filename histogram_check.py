@@ -2,9 +2,9 @@
 Interactive plotting window to look at various SME abundances
 for GALAH K2 data. 
 Use the ``bokeh serve`` command to run the example by executing:
-    bokeh serve abundance_comp.py
+    bokeh serve histogram_check.py
 at your command prompt. Then navigate to the URL
-    http://localhost:5006/abundance_comp
+    http://localhost:5006/histogram_check
 in your browser.
 '''
 import numpy as np
@@ -55,8 +55,7 @@ def update_data(source, xname, yname):
 
 def make_scatter_plot(source): 
 
-    TOOLS="pan,wheel_zoom,box_select,lasso_select"
-
+    TOOLS= [BoxZoomTool(), ResetTool(), ResizeTool(), PreviewSaveTool(), PanTool(), HoverTool(tooltips=[("sobject_id","@sobject_id")])]
     # create the scatter plot
     scatter_plot = figure(tools=TOOLS, plot_width=600, plot_height=600, title=None, min_border=10, min_border_left=50)
     r = scatter_plot.scatter('x','y', size=3, source=source, color="#3A5785", alpha=0.6)
