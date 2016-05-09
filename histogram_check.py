@@ -1,11 +1,19 @@
 '''
 Interactive plotting window to look at various SME abundances
-for GALAH K2 data. 
+for GALAH K2 data.
+
+To use this, you need the python bokeh, pandas, and numpy modules.
+You also need to change the file location below to that of your local
+machine. 
+
 Use the ``bokeh serve`` command to run the example by executing:
     bokeh serve histogram_check.py
 at your command prompt. Then navigate to the URL
     http://localhost:5006/histogram_check
 in your browser.
+
+This has been heavily modified but was built off of the selection_histogram.py example from bokeh
+-k. schlesinger
 '''
 import numpy as np
 import pandas as pd
@@ -16,6 +24,8 @@ from bokeh.models.widgets import TextInput,Select
 from bokeh.io import curdoc
 from bokeh.charts import Histogram
 
+
+## Function to create source file from selected data columns. 
 def update_data(source, xname, yname):
 
     axis_map = {
@@ -57,22 +67,23 @@ def update_data(source, xname, yname):
     xbinnum=25
     ybinnum=25
 
-    test=np.where(np.isnan(df[x_name])==False)[0]
-    hhist, hedges = np.histogram(df.loc[test,x_name], bins=xbinnum)
+    ## Make horizontal histogram and write it into dataframe 
+    hhist, hedges = np.histogram(df.loc[np.where(np.isnan(df[x_name])==False)[0],x_name], bins=xbinnum)
     lst=[np.nan]*(len(df)-xbinnum) 
     lst2=[np.nan]*(len(df)-(xbinnum+1)) 
     df['hhist']=pd.concat([pd.Series(hhist),pd.Series(lst)], ignore_index=True)
     df['hedges_left']=pd.concat([pd.Series(hedges[:-1]),pd.Series(lst2)], ignore_index=True)
     df['hedges_right']=pd.concat([pd.Series(hedges[1:]),pd.Series(lst2)], ignore_index=True)
-    
-    test=np.where(np.isnan(df[y_name])==False)[0]
-    vhist, vedges = np.histogram(df.loc[test,y_name], bins=ybinnum)
+
+    ## Make vertical histogram and write it into dataframe
+    vhist, vedges = np.histogram(df.loc[np.where(np.isnan(df[y_name])==False)[0],y_name], bins=ybinnum)
     lst=[np.nan]*(len(df)-ybinnum) 
     lst2=[np.nan]*(len(df)-(ybinnum+1)) 
     df['vhist']=pd.concat([pd.Series(vhist),pd.Series(lst)], ignore_index=True)
     df['vedges_left']=pd.concat([pd.Series(vedges[:-1]),pd.Series(lst2)], ignore_index=True)
     df['vedges_right']=pd.concat([pd.Series(vedges[1:]),pd.Series(lst2)], ignore_index=True)
-    
+
+    ## Produce source file used for the other functions, etc. 
     source = ColumnDataSource(data=dict(x=df[x_name], y=df[y_name], hhist=df['hhist'], hedges_left=df['hedges_left'], hedges_right=df['hedges_right'], vhist=df['vhist'], vedges_left=df['vedges_left'], vedges_right=df['vedges_right'], sobject_id=df['sobject_id']))
 
     return source
@@ -80,53 +91,41 @@ def update_data(source, xname, yname):
 
 def make_scatter_plot(source, xname,yname): 
 
+    ## Select tools for top right of figure
     TOOLS= [BoxZoomTool(), ResetTool(), ResizeTool(), PanTool(), HoverTool(tooltips=[("sobject_id","@sobject_id")])]
-    # create the scatter plot
-    scatter_plot = figure(tools=TOOLS, plot_width=600, plot_height=600, title=None, min_border=10, min_border_left=50)
-    r = scatter_plot.scatter('x','y', size=3, source=source, color="#3A5785", alpha=0.6)
 
-    scatter_plot.select(BoxSelectTool).select_every_mousemove = False
-    scatter_plot.select(LassoSelectTool).select_every_mousemove = False
+    ## create the scatter plot
+    scatter_plot = figure(tools=TOOLS, plot_width=600, plot_height=600, title=None, min_border=10, min_border_left=50)
+    scatter_plot.scatter('x','y', size=3, source=source, color="#3A5785", alpha=0.6)
     scatter_plot.min_border_right = 10
 
-    # create the horizontal histogram
+    ## create the horizontal histogram
     LINE_ARGS = dict(color="#3A5785", line_color=None)
-
     ph = figure(toolbar_location=None, plot_width=scatter_plot.plot_width, plot_height=200, x_range=scatter_plot.x_range,
                 title=None, min_border=10, min_border_left=50)
     ph.xgrid.grid_line_color = None
-
     ph.quad(bottom=0, left='hedges_left', right='hedges_right', top='hhist', color="white", line_color="#3A5785", source=source)
     ph.min_border_top = 10
     ph.min_border_right = 10
 
-    # create the vertical histogram
-    th = 42 # need to adjust for toolbar height, unfortunately
+    ## create the vertical histogram
+    th = 42 ## need to adjust for toolbar height
     pv = figure(toolbar_location=None, plot_width=200, plot_height=scatter_plot.plot_height+th-10,
                 y_range=scatter_plot.y_range, title=None, min_border=10, min_border_top=th)
     pv.ygrid.grid_line_color = None
     pv.xaxis.major_label_orientation = -3.14/2
-
     pv.quad(left=0, bottom='vedges_left', top='vedges_right', right='vhist', color="white", line_color="#3A5785", source=source)
-    #vh1 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **LINE_ARGS)
-    #vh2 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **LINE_ARGS)
-
     pv.min_border_top = 80
     pv.min_border_left = 0
  
     return scatter_plot,ph,pv
 
-# set up callbacks
+## set up callbacks
 def update_scatter_plot(attr, old, new):
     x_value=select_x.value
     y_value=select_y.value
 
-    #ph.xaxis.axis_label = x_value
-    ph.yaxis.axis_label = 'Number'
-    
-    pv.xaxis.axis_label = 'Number'
-    #pv.yaxis.axis_label = yname
-
+    ## Change axis labels 
     plot.xaxis.axis_label=x_value
     plot.yaxis.axis_label=y_value
 
@@ -169,6 +168,12 @@ axis_map = {
 select_x=Select(title="X axis:", value="[Fe/H]", options=axis_map.keys())
 select_y=Select(title="Y axis:", value="[a/Fe]", options=axis_map.keys())
 
+
+#################################################
+##### CHANGE FILE LOCATION FOR PERSONAL USE #####
+#################################################
+
+## Read in data table from fits file. When you use this on your own machine, will need to change the file location
 from astropy.table import Table
 abund=Table.read('/Users/kschles/Documents/GALAH/wg4output/wg4_04292016/sobject_iraf_k2.fits', format='fits')
 abund=Table.to_pandas(abund)
@@ -179,19 +184,13 @@ y_value="[a/Fe]"
 ## Set up initial data: 
 source = update_data(abund, x_value, y_value)
 
-## Produce main scatter plot: 
+## Produce plots: 
 plot, ph, pv=make_scatter_plot(source, x_value, y_value)
 
 ph.yaxis.axis_label = 'Number'
 pv.xaxis.axis_label = 'Number'
 plot.xaxis.axis_label=x_value
 plot.yaxis.axis_label=y_value
-
-## Produce horizontal histogram:
-#ph=make_hor_hist(source, plot)
-
-## Produce vertical histogram
-#pv=make_vert_hist(source, plot)
 
 layout = vplot(hplot(select_x, select_y), hplot(plot, pv), hplot(ph, Paragraph(width=200)), width=800, height=800)
 
