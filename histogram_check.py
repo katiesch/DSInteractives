@@ -20,13 +20,13 @@ import pandas as pd
 
 from bokeh.plotting import figure, hplot, vplot
 from bokeh.models import ColumnDataSource, HBox, VBoxForm,Range1d, HoverTool, BoxZoomTool, ResetTool, ResizeTool, PreviewSaveTool, PanTool, BoxSelectTool, LassoSelectTool, Paragraph
-from bokeh.models.widgets import TextInput,Select
+from bokeh.models.widgets import TextInput,Select,Slider
 from bokeh.io import curdoc
 from bokeh.charts import Histogram
 
 
 ## Function to create source file from selected data columns. 
-def update_data(source, xname, yname):
+def update_data(source, xname, yname, binval):
 
     axis_map = {
         "[Fe/H]": "feh_cannon",
@@ -64,8 +64,8 @@ def update_data(source, xname, yname):
     x_name = axis_map[xname]
     y_name = axis_map[yname]
 
-    xbinnum=25
-    ybinnum=25
+    xbinnum=int(binval)
+    ybinnum=int(binval)
 
     ## Make horizontal histogram and write it into dataframe 
     hhist, hedges = np.histogram(df.loc[np.where(np.isnan(df[x_name])==False)[0],x_name], bins=xbinnum)
@@ -124,12 +124,13 @@ def make_scatter_plot(source, xname,yname):
 def update_scatter_plot(attr, old, new):
     x_value=select_x.value
     y_value=select_y.value
+    bin_value=binnum.value
 
     ## Change axis labels 
     plot.xaxis.axis_label=x_value
     plot.yaxis.axis_label=y_value
 
-    src = update_data(abund, x_value, y_value)
+    src = update_data(abund, x_value, y_value,bin_value)
     source.data.update(src.data)
 
 
@@ -167,7 +168,7 @@ axis_map = {
 
 select_x=Select(title="X axis:", value="[Fe/H]", options=axis_map.keys())
 select_y=Select(title="Y axis:", value="[a/Fe]", options=axis_map.keys())
-
+binnum = TextInput(title="Number of Bins:", value='25')
 
 #################################################
 ##### CHANGE FILE LOCATION FOR PERSONAL USE #####
@@ -180,9 +181,9 @@ abund=Table.to_pandas(abund)
 
 x_value="[Fe/H]"
 y_value="[a/Fe]"
-
+bin_value='25'
 ## Set up initial data: 
-source = update_data(abund, x_value, y_value)
+source = update_data(abund, x_value, y_value,bin_value)
 
 ## Produce plots: 
 plot, ph, pv=make_scatter_plot(source, x_value, y_value)
@@ -192,8 +193,8 @@ pv.xaxis.axis_label = 'Number'
 plot.xaxis.axis_label=x_value
 plot.yaxis.axis_label=y_value
 
-layout = vplot(hplot(select_x, select_y), hplot(plot, pv), hplot(ph, Paragraph(width=200)), width=800, height=800)
+layout = vplot(hplot(select_x, select_y,binnum), hplot(plot, pv), hplot(ph, Paragraph(width=200)), width=800, height=800)
 
 
-for w in [select_x, select_y]:
+for w in [select_x, select_y, binnum]:
     w.on_change('value', update_scatter_plot)
