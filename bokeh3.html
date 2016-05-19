@@ -1,17 +1,35 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html> <head>
         <meta charset="utf-8">
-        <title>Bokeh Scatter Plots</title>
+        <title>GALAH K2 Parameter Comparison Machine</title>
 
          <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.11.1.min.css" type="text/css" />
         <!--<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.11.1.css" type="text/css" />-->
         <link rel="stylesheet" src="bokeh-widgets-0.11.1.mod.css" type="text/css" />
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
         <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.11.1.min.js"></script>
         <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-compiler-0.11.1.min.js"></script>
         <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.11.1.js"></script>
         <script type="text/javascript" src="bokeh3.js"></script>
+<script>
+    //Change the 5000 to a value which you need so that loading image shows till your page completely
+    $(window).load(function () { $("#spinner").fadeOut(5000); }) 
+</script>
 
 <style>
+
+#spinner    {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        /*Change your loading image here*/
+        background: src="hex-loader2.gif";
+    }
+
+
 section {
     width: 100%;
     margin: auto;
@@ -38,18 +56,24 @@ div#three {
 </head>
 
 <body>
-<div class="plotdiv" id="79f8d20b-4564-4e6c-8e44-d556e968a8be"></div>
-<div class="plotdiv" id="2ec593a0-9a34-46f9-88e6-267fd1e80ea7"></div>
+
+    <!-- Preloader -->
+    <div id="spinner">
+    </div>
+  
+
+<div class="plotdiv" id="913a0a3b-b04b-415a-ab0c-6ff04ec8bd95"></div>
+<div class="plotdiv" id="c619929a-f4c2-43a9-ad8f-93f0699a533f"></div>
 <section>
     <div id="one">
-    <div class="plotdiv" id="bf4eeba7-3b61-4a3c-b1ac-8da4bd021a93"></div>
+    <div class="plotdiv" id="3477cb71-b190-4e52-b1df-346f85c692e9"></div>
     </div>
     <div id="two">
-    <div class="plotdiv" id="7441a6a1-8af1-47b1-94d9-8a375f8a71c9"></div>
+    <div class="plotdiv" id="a3a238a9-a8fe-4599-b510-4d9577e0177c"></div>
     </div>
 
 <div id="three">
-<div class="plotdiv" id="75ca8f51-e0e9-49ae-be53-ce8f83a63026"></div>
+<div class="plotdiv" id="38713fde-ac01-45e3-a833-921bddf107eb"></div>
 </div>
 </section>
 
