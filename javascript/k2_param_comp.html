@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<!--<link href="../../styles/check_cs6.css" rel="stylesheet" type="text/css">-->
+<!-- include Aladin Lite CSS file in the head section of your page -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/2.4.0/math.js" charset="utf-8"></script>
+<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+<!--<script src="color-js-master/color.js"></script>-->
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.cycle/3.03/jquery.cycle.all.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.js"></script>
+
+<style type="text/css">
+	
+.axis path,
+.axis line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+	font-family: sans-serif;
+	font-size: 11px;
+}
+
+</style>
+
+</head>
+
+
+
+<body>
+
+<br><br>
+
+<div id="area1"></div>
+<div id="area2"></div> 
+
+<br/>
+
+<select id="xaxis_select">
+  <option value="teff_cannon">Temperature</option>
+  <option value="feh_cannon">[Fe/H]</option>
+  <option value="logg_cannon">log(g)</option>
+  <option value="alpha_fe_cannon">[a/Fe]</option>
+</select>
+
+<select id="yaxis_select">
+  <option value="logg_cannon">log(g)</option>
+  <option value="feh_cannon">[Fe/H]</option>
+  <option value="teff_cannon">Temperature</option>
+  <option value="alpha_fe_cannon">[a/Fe]</option>
+</select>
+
+<script type="text/javascript">
+
+//Width and height
+var w = 500;
+var h = 300;
+var padding = 30;
+
+//Create SVG element
+var svg1 = d3.select("#area1")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", h);
+
+var svg2 = d3.select("#area2")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", h/3.);
+
+function update(){
+
+var xVar = d3.select('#xaxis_select').node().value;
+console.log(xVar);
+var yVar = d3.select('#yaxis_select').node().value;
+console.log(yVar);
+
+var data=baseData
+
+
+//Create scale functions
+var xScale = d3.scale.linear()
+					 .domain([d3.min(data,function(d){ return d[xVar]; }), d3.max(data,function(d) { return d[xVar]; })])
+					 .range([padding, w - padding * 2]);
+
+var yScale = d3.scale.linear()
+					 .domain([d3.min(data,function(d){ return d[yVar]; }), d3.max(data,function(d) { return d[yVar]; })])
+					 .range([h - padding, padding]);
+
+var rScale = d3.scale.linear()
+					 .domain([0, d3.max(data, function(d) { return Math.abs(d.feh_cannon); })])
+					 .range([0.1,2.5]);
+
+//Define X axis (uses xScale)
+var xAxis = d3.svg.axis()
+				  .scale(xScale)
+				  .orient("bottom");
+				  //.ticks(5);
+
+//Define Y axis (uses yScale) 
+var yAxis = d3.svg.axis()
+				  .scale(yScale)
+				  .orient("left");
+				  //.ticks(5);
+
+
+//Create circles
+svg1.selectAll("circle")
+   .data(data)
+   .attr("cx", function(d) {
+   		return xScale(d[xVar]);
+   })
+   .attr("cy", function(d) {
+   		return yScale(d[yVar]);
+   })
+   .attr("r", function(d) {
+   		return rScale(2.*Math.abs(d.alpha_fe_cannon));
+   })
+   .enter()
+   .append("circle")
+   .attr("cx", function(d) {
+   		return xScale(d[xVar]);
+   })
+   .attr("cy", function(d) {
+   		return yScale(d[yVar]);
+   })
+   .attr("r", function(d) {
+   		return rScale(2.*Math.abs(d.alpha_fe_cannon));
+   });
+
+//Create X axis
+svg1.selectAll("g.axis").remove()
+
+svg1.append("g")
+	.attr("class", "axis")
+	.attr("transform", "translate(0," + (h - padding) + ")")
+	.call(xAxis);
+
+svg2.append("g")
+	.attr("class", "axis")
+	.attr("transform", "translate(0," + (h - padding) + ")")
+	.call(xAxis);
+
+
+//Create Y axis
+svg1.append("g")
+	.attr("class", "axis")
+	.attr("transform", "translate(" + padding + ",0)")
+	.call(yAxis);
+}
+
+// Read in data file
+
+var baseData = null;
+d3.csv("sobject_iraf_k2.csv", function(error, data) {
+  if (error) throw error;
+
+  data.forEach(function(d) {
+    d.sobject_id  = +d.sobject_id; 
+    d.teff_cannon = +d.teff_cannon;
+    d.logg_cannon = +d.logg_cannon;
+    d.feh_cannon  = +d.feh_cannon;
+    d.alpha_fe_cannon = +d.alpha_fe_cannon;
+  });
+  baseData=data
+  update("teff_cannon", "logg_cannon");
+});
+
+d3.selectAll('select').on('change',function(){
+  update();
+});
+
+</script>
+
+</body>
+
+</html>     
+
