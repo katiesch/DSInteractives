@@ -1,6 +1,7 @@
-# GALAHInteractives
-Interactive bokeh codes to play with the GALAH data
+# DSInteractives
+Interactive bokeh codes to play with data
 
+# GALAH Data: 
 We already have a bunch of parameter and abundance information for 
 ~27,000 GALAH targets that fall in K2 fields. I wanted to be able 
 to quickly look at the shape of the abundance and parameter distributions 
@@ -25,3 +26,5 @@ bokeh3.html and bokeh3.js are created by abundance_embed.py.
 The javascript directory has some scripts/html I've been playing with. The purpose 
 is similar to bokeh3.html/.js, just in another language. It can be seen at 
 http://www.mso.anu.edu.au/~kschles/datavis/k2_param_comp.html
+
+# Other Data: 
